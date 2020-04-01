@@ -1,0 +1,3 @@
+baseURL = "http://intel.github.io/cri-resource-manager"
+languageCode = "en-us"
+title = "CRI Resource Manager"
