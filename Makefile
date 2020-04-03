@@ -249,7 +249,7 @@ site-serve:
 	$(Q)$(DOCKER_SITE_CMD) hugo server -D --bind=0.0.0.0 -d _site
 
 update-gh-pages: site-build
-	$(Q)scripts/hack/update-gh-pages.sh site/_site
+	$(Q)scripts/hack/update-gh-pages.sh -a site/_site
 
 #
 # Rules for running unit/module tests.
