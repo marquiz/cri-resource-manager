@@ -103,7 +103,7 @@ DOCKER_DEB_BUILD := mkdir -p /build && cd /build && \
 
 # Docker base command for working with html documentation.
 HUGO_VERSION := 0.68
-DOCKER_SITE_CMD := $(DOCKER) run --rm -it --volume="`pwd`/site:/src" -p 1313:1313 --user=`id -u`:`id -g` jojomi/hugo:$(HUGO_VERSION)
+DOCKER_SITE_CMD := $(DOCKER) run --rm -i --volume="`pwd`/site:/src" -p 1313:1313 --user=`id -u`:`id -g` jojomi/hugo:$(HUGO_VERSION)
 
 # Where to leave built packages, if/when we build them in containers.
 PACKAGES_DIR = packages
@@ -240,10 +240,16 @@ golangci-lint:
 #
 
 site-build:
+	$(Q)rm -rf site/_site
+	$(Q)git submodule update --init
 	$(Q)$(DOCKER_SITE_CMD) hugo -D -d _site
 
 site-serve:
+	$(Q)git submodule update --init
 	$(Q)$(DOCKER_SITE_CMD) hugo server -D --bind=0.0.0.0 -d _site
+
+update-gh-pages: site-build
+	$(Q)scripts/hack/update-gh-pages.sh site/_site
 
 #
 # Rules for running unit/module tests.
@@ -453,4 +459,4 @@ pkg/cri/resource-manager/visualizer/bubbles/assets_vfsdata.go:: \
 # phony targets
 .PHONY: all build install clean test images \
 	format vet cyclomatic-check lint golangci-lint \
-	git-version git-buildid site-build site-serve
+	git-version git-buildid site-build site-serve update-gh-pages
