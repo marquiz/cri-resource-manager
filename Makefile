@@ -91,6 +91,8 @@ SPEC_FILES = $(shell find packaging -name \*.spec.in | sed 's/.spec.in/.spec/g' 
 SYSTEMD_DIRS = $(shell find cmd -name \*.service -o -name \*.socket | sed 's:cmd/::g;s:/.*::g'|uniq)
 SYSCONF_DIRS = $(shell find cmd -name \*.sysconf | sed 's:cmd/::g;s:/.*::g' | uniq)
 
+DOCKER := docker
+
 # Extra options to pass to docker (for instance --network host).
 DOCKER_OPTIONS =
 
@@ -98,6 +100,10 @@ DOCKER_OPTIONS =
 DOCKER_DEB_BUILD := mkdir -p /build && cd /build && \
     git clone /input/cri-resource-manager && cd /build/cri-resource-manager && \
     make BUILD_DIRS=cri-resmgr deb
+
+# Docker base command for working with html documentation.
+HUGO_VERSION := 0.68
+DOCKER_SITE_CMD := $(DOCKER) run --rm -it --volume="`pwd`/site:/src" -p 1313:1313 --user=`id -u`:`id -g` jojomi/hugo:$(HUGO_VERSION)
 
 # Where to leave built packages, if/when we build them in containers.
 PACKAGES_DIR = packages
@@ -230,6 +236,16 @@ golangci-lint:
 
 
 #
+# Rules for documentation
+#
+
+site-build:
+	$(Q)$(DOCKER_SITE_CMD) hugo -D -d _site
+
+site-serve:
+	$(Q)$(DOCKER_SITE_CMD) hugo server -D --bind=0.0.0.0 -d _site
+
+#
 # Rules for running unit/module tests.
 #
 
@@ -331,7 +347,7 @@ deb-docker-%: docker/%-build
 	echo "Docker cross-building $$distro packages..."; \
 	mkdir -p $(PACKAGES_DIR)/$$distro && \
 	rm -fr $$builddir && mkdir -p $$builddir && \
-	docker run --rm -ti $(DOCKER_OPTIONS) --user $(shell echo $$USER) \
+	$(DOCKER) run --rm -ti $(DOCKER_OPTIONS) --user $(shell echo $$USER) \
 	    --env USER_NAME="$(USER_NAME)" --env USER_EMAIL=$(USER_EMAIL) \
 	    -v $$(pwd):/input/cri-resource-manager \
 	    -v $$(pwd)/$$builddir:/build \
@@ -349,7 +365,7 @@ debian-packages:
 # Build a docker image (for distro cross-building).
 docker/%: dockerfiles/Dockerfile.%
 	$(Q)img=$(patsubst docker/%,%,$@); \
-	docker rm $$img || : && \
+	$(DOCKER) rm $$img || : && \
 	echo "Building cross-build docker image $$img..."; \
 	scripts/build/docker-build-image $$img --container $(DOCKER_OPTIONS)
 
@@ -437,4 +453,4 @@ pkg/cri/resource-manager/visualizer/bubbles/assets_vfsdata.go:: \
 # phony targets
 .PHONY: all build install clean test images \
 	format vet cyclomatic-check lint golangci-lint \
-	git-version git-buildid
+	git-version git-buildid site-build site-serve
