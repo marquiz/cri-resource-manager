@@ -1,9 +1,20 @@
 ---
 title: "Configuration Reference"
 layout: default
+parent: Advanced
+nav_order: 2
 ---
 
 # Configuration reference
+{: .no_toc }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
 
 ## Configuration flow
 

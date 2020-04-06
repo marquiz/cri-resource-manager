@@ -1,9 +1,20 @@
 ---
 title: "Introduction"
 layout: default
+parent: Get started
+nav_order: 1
 ---
 
 # Introduction
+{: .no_toc }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
 
 The main purpose of this CRI relay/proxy is to apply various (hardware) resource
 allocation policies to containers in a system. The relay sits between the kubelet
