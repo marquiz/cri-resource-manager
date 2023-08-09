@@ -3,37 +3,34 @@ name: Security Scanning
 on:
   push:
     branches: [ master ]
-    tags: [ '*' ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ master ]
 
 jobs:
-  snyk-scanning:
+  trivy-scan-code:
+    name: Build
     runs-on: ubuntu-latest
-    environment:
-      name: dev
-      url: https://github.com
-
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v3
 
-    - name: Set Up Snyk
-      uses: snyk/actions/setup@master
-
-    - name: Run Snyk to check for vulnerabilities
-      continue-on-error: true
-      uses: snyk/actions/golang@master
-      env:
-        SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
+    - name: Run Trivy in fs mode
+      uses: aquasecurity/trivy-action@master
       with:
-        args: --sarif-file-output=snyk.sarif
+        scan-type: 'fs'
+        scan-ref: '.'
+        exit-code: 1
+        list-all-pkgs: true
+        format: template
+        template: trivy-csv.tpl
+        output: trivy-report.csv
 
-    - name: Upload result to GitHub Code Scanning
-      if: ${{ github.event_name != 'pull_request' }}
-      uses: github/codeql-action/upload-sarif@v2
+    - name: Update trivy CSV report as an artifact
+      uses: actions/upload-artifact@v3
       with:
-       sarif_file: snyk.sarif
+        name: trivy-report
+        path: trivy-report.csv
 
   codeQL-scanning:
     runs-on: ubuntu-latest
