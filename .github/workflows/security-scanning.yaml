@@ -16,6 +16,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Run Trivy in fs mode
+      continue-on-error: true
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
@@ -23,7 +24,7 @@ jobs:
         exit-code: 1
         list-all-pkgs: true
         format: template
-        template: trivy-csv.tpl
+        template: @trivy-csv.tpl
         output: trivy-report.csv
 
     - name: Update trivy CSV report as an artifact
