@@ -1,0 +1,9 @@
+name: Test hack
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Hack
+      run: echo build
