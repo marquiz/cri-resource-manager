@@ -1,4 +1,3 @@
-name: Trivy scanning
 on:
   workflow_call:
     inputs:
